@@ -1,0 +1,9 @@
+[ { "couleur": "Bleue", "longueur": 3, "largeur": 1.5 },
+  { "couleur": "Rouge", "longueur": 2, "largeur": 1 },
+  { "couleur": "Bleue", "longueur": 4, "largeur": 1.5 },
+  { "couleur": "Rouge", "longueur": 3, "largeur": 1 },
+  { "couleur": "Bleue", "longueur": 3.5, "largeur": 0.5 },
+  { "couleur": "Rouge", "longueur": 2, "largeur": 0.5 },
+  { "couleur": "Bleue", "longueur": 5.5, "largeur": 1 },
+  { "couleur": "Rouge", "longueur": 1, "largeur": 1 },
+  { "couleur": null, "longueur": 4, "largeur": 1.5 } ]
