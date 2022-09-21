@@ -1,0 +1,120 @@
+{% extends 'template.html' %}
+{% load static %}
+
+{% block title %}ScrapChap{% endblock %}
+{% block head %}
+    <script>
+      function active(page) {
+        const readImg = document.querySelector('.read-img');
+        readImg.src = '';
+        readImg.src = page.getAttribute('data-link');
+        try { document.querySelector('#active').id = ''; } catch {}
+        page.id = 'active';
+        window.scrollTo(0, 0);
+        document.querySelector('.pages').scrollTo(0, 0)
+        document.querySelector('.pages').scrollTo(page.getBoundingClientRect().x/2, 0)
+        const pages = document.querySelectorAll('.page');
+        const nbPage = Array.from(pages).indexOf(page);
+        document.querySelector('.read-img-after').src = pages[nbPage+1].getAttribute('data-link');
+      }
+      function turnPage(event) {
+        const { clientX } = event;
+        const imgWidth = document.querySelector('.read-img').clientWidth*0.2;
+        if (clientX > (window.innerWidth/2+imgWidth)) { var i = 1; }
+        else if (clientX < (window.innerWidth/2-imgWidth)) { var i = -1; }
+        else { zoom(); return; }
+        const pages = document.querySelectorAll('.page');
+        const x = Array.from(pages).indexOf(document.querySelector('#active'))
+        if (pages[x+i] != undefined) { active(pages[x+i]); }
+      }
+      function zoom(zoom='') {
+        if (zoom == '') {
+          const readImgStyle = document.querySelector('.read-img').style;
+          if (readImgStyle.width == '') {
+            readImgStyle.width = '25%';
+            readImgStyle.minHeight = readImgStyle.height.split('-')[1].split(')')[0]
+            readImgStyle.height = '';
+            readImgStyle.cursor = 'zoom-in';
+          } else if (readImgStyle.width != '100%') { readImgStyle.width = parseInt(readImgStyle.width.split('%')[0])+25+'%'; }
+          else if (readImgStyle.width == '100%') {
+            readImgStyle.width = '';
+            readImgStyle.height = `calc(100% - ${readImgStyle.minHeight})`;
+            readImgStyle.minHeight = '';
+            readImgStyle.cursor = 'zoom-out';
+          }
+          if (document.querySelector('.read-img').clientWidth < window.innerWidth/4) { zoom(); }
+        } else {
+          for (let webtoon of document.querySelectorAll('.read img')) {
+            webtoon.style.width = zoom+'%';
+            webtoon.style.margin = '0 '+(100-zoom)/2+'%';
+          }
+        }
+      }
+      function changePointer(event) {
+        const { clientX } = event;
+        const readImg = document.querySelector('.read-img');
+        const imgWidth = readImg.clientWidth*0.2;
+        if (clientX > (window.innerWidth/2+imgWidth)) { readImg.style.cursor = "url({% static 'img/leftArrow' %}{{ app }}.png), pointer"; }
+        else if (clientX < (window.innerWidth/2-imgWidth)) { readImg.style.cursor = "url({% static 'img/rigthArrow' %}{{ app }}.png), pointer"; }
+        else if (readImg.style.width != '100%') { readImg.style.cursor = 'zoom-in'; }
+        else { readImg.style.cursor = 'zoom-out'; }
+      }
+      function readMode(option) {
+        window.location.href = window.location.href.split('&readmode')[0]+'&readmode='+option.value;
+      }
+    </script>
+{% endblock %}
+{% block main %}
+      <ul class="pages scrollbar">
+        {% for page in container  %}
+          <li class="page" id="" data-link="{{ page.link }}" onclick="active(this)">{{ page.name }}</li>
+        {% endfor %}
+        <br>
+      </ul>
+      <div class="read-setting readmode">
+        <label for="readmode">Read-mode</label>
+        <select name="readmode" id="readmode" onchange="readMode(this)">
+          <option value="manga" id="manga">Manga</option>
+          <option value="webtoon" id="webtoon">Webtoon</option>
+        </select>
+      </div>
+      <div class="read-setting zoom" style="display: none;">
+        <label for="zoom">Zoom</label>
+        <input type="range" id="zoom" name="zoom" min="10" value="50" onchange="zoom(value)">
+      </div>
+      <div class="read">
+        <img class="read-img" src="" style="height: calc(100% - 180px);" onload="if(clientWidth < window.innerWidth/4) { zoom(); }"></img>
+        <img class="read-img-after" src=""></img>
+      </div>
+      <script>
+        const pages = document.querySelectorAll('.page');
+        const readmode = window.location.search.split('readmode=')[1] || 'manga';
+        document.querySelector('#'+readmode).selected = true;
+        if (!readmode.includes('webtoon')) {
+          active(document.querySelector('li'));
+          if ( pages.length*pages[0].clientWidth*2 > window.innerWidth ) { document.querySelector('.pages').style.justifyContent = 'left' }
+          else if (pages.length == 1) {
+            document.querySelector('.pages').style.display = 'none';
+            document.querySelector('.read-img').style = 'height: calc(100% - 110px); margin-top: -20px';
+          }
+          document.querySelector('.read-img').addEventListener('mousemove', changePointer);
+          document.querySelector('.read-img').addEventListener('click', turnPage);
+        } else {
+          document.querySelector('.pages').style.display = 'none';
+          const read = document.querySelector('.read');
+          read.style.display = 'contents';
+          read.innerHTML = '';
+          for (var x = 0; x < pages.length; x++) {
+            var newWebtoonPage = document.createElement('img');
+            newWebtoonPage.className = 'read-webtoon';
+            newWebtoonPage.style.minHeight = window.innerHeight/3+'px';
+            newWebtoonPage.setAttribute('data-src', pages[x].getAttribute('data-link'));
+            if (x < 5) { newWebtoonPage.src = pages[x].getAttribute('data-link'); }
+            newWebtoonPage.setAttribute('onload', "style.minHeight=0");
+            read.appendChild(newWebtoonPage);
+          }
+          document.querySelector('.readmode').style.position = 'fixed';
+          document.querySelector('.zoom').style.display = '';
+        }
+      </script>
+{% endblock %}

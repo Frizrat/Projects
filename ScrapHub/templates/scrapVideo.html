@@ -1,0 +1,30 @@
+{% extends 'template.html' %}
+
+{% block title %}ScrapEp{% endblock %}
+{% block head %}
+    <script>
+      function active(embed) {
+        try { document.querySelector('#active').id = ''; } catch {}
+        document.querySelector('iframe').src = embed.getAttribute('data-link');
+        embed.id = 'active';
+      }
+    </script>
+{% endblock %}
+{% block main %}
+      <ul class="players scrollbar">
+        {% for player in container  %}
+          <li class="player" id="" data-link="{{ player.link }}" onclick="id='click'; active(this)">{{ player.name }}</li>
+        {% endfor %}
+      </ul>
+      <div class="iframe"><iframe src="" style="height: calc(100% - 177px);" frameborder="0" allowfullscreen></iframe></div>
+      <script>
+        const players = document.querySelectorAll('.player');
+        const playersLength = Array.from(players).reduce(function (sum, player) {return sum + player.clientWidth}, 0);
+        if ( playersLength > window.innerWidth ) { document.querySelector('.players').style.justifyContent = 'left' }
+        if (players.length == 1) {
+          document.querySelector('.players').style.display = 'none';
+          document.querySelector('iframe').style = 'height: calc(100% - 104px); margin-top: -20px';
+        }
+        active(document.querySelector('li'));
+      </script>
+{% endblock %}
