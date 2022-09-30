@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <title>Commande le super robot</title>
+    <meta charset="UTF-8">
+    <style>
+      * { text-align: center; font-family: Arial, Helvetica, sans-serif; }
+      a { text-decoration: none; font-size: 50px; } h2 { font-size: 30px; }
+      .direction { text-align: left; margin-left: 45%; width: 10%; }
+      .vitesse input { width: 25%; }
+    </style>
+    <script>
+      window.onload = (() => {
+        document.querySelector('.direction').value = 'y';
+        try {
+          document.querySelector('.vitesse input').value = window.location.search.split('=')[1];
+          document.querySelector('.direction').value = window.location.search.split('?')[1].split('=')[0];
+          document.getElementById(document.querySelector('.direction').value).checked = true;
+        } catch{}
+      })
+      function Commande() {
+        const direction = document.querySelector('.direction').value;
+        const valeur = document.querySelector('.vitesse input').value;
+        window.location = `?${direction}=${valeur}`;
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Commande le super robot</h1>
+    <main>
+      <form class="direction" value="y">
+        <input type="radio" id="x" name="axe" value="x" onclick="document.querySelector('.direction').value = 'x';">
+        <label for="x">Latéral</label><br>
+        <input type="radio" id="y" name="axe" value="y" onclick="document.querySelector('.direction').value = 'y';" checked>
+        <label for="y">Avancer</label><br>
+        <input type="radio" id="z" name="axe" value="z" onclick="document.querySelector('.direction').value = 'z';">
+        <label for="z">Tourner</label>
+      </form>
+      
+      <form class="vitesse">
+        <label for="vitesse">Vitesse (0 à 100)</label>
+        <br>
+        <input type="range" id="vitesse" min="0" max="100" step="10" value="20" onchange="Commande()">
+      </form>
+      <a href="/"><span>Stop</span></a>
+    </main>
+  </body>
+</html>
