@@ -9,25 +9,26 @@ session = newSession()
 headers = initHeaders()
 scrapSites = {
     'Vostfree': {'baseUrl': 'https://vostfree.cx', 'img': 'https://vostfree.cx/templates/Animix/images/logo.png', 'style': 'margin-left: 15px'},
-    'Vostanimes': {'baseUrl': 'https://vostanimez.tv', 'img': 'https://vostanimez.tv/wp-content/uploads/2022/06/logo.png'},
+    'Vostanimes': {'baseUrl': 'https://vostanimey.com', 'img': 'https://vostanimey.com/wp-content/uploads/2022/09/cooltext418474422348093.png'},
     'Adkami': {'baseUrl': 'https://www.adkami.com', 'img': 'https://i.postimg.cc/4yX1tdVM/ADKami-Logo.png'},
     #'Voiranime': {'baseUrl': 'https://voiranime.com', 'img': 'https://1.bp.blogspot.com/-tnOKXWZFR2E/YCZWXHBmzjI/AAAAAAAAACQ/5u3_g7cC6D40AQxnX39AK9TkXo0VVejogCLcBGAsYHQ/s320/Untitled.png'},
     'IAnimes': {'baseUrl': 'https://www.ianimes.org', 'img': 'https://www.ianimes.org/img/i-anime.png', 'style':'width:248px'},
 
     'Wiflix': {'baseUrl': 'https://wiflix.zone', 'img': 'https://wiflix.zone/templates/wiflixnew/images/logo.png'},
-    'FrenchStream': {'baseUrl': 'https://www.french-stream.re', 'img': 'https://i.postimg.cc/gkyWt2kQ/fstream-logo.png'},
+    'FrenchStream': {'baseUrl': 'https://wwv.french-stream.re', 'img': 'https://i.postimg.cc/gkyWt2kQ/fstream-logo.png'},
 
     'Ninemanga': {'baseUrl': 'https://fr.ninemanga.com', 'img': 'https://www.ninemanga.com/files/img/ninemanga.png'},
+    'ScanMangas': {'baseUrl': 'https://scansmangas.ws', 'img': 'https://scansmangas.ws/wp-content/uploads/2019/10/logo.png'},
     #'MangasOrigines': {'baseUrl': 'https://mangas-origines.fr', 'img': 'https://mangas-origines.fr/wp-content/uploads/2017/10/Mangas_logo.png', 'style': 'margin-left: -10px'},
 }
-# https://www.japanread.cc/     zlib
+# https://manga-scantrad.net/
+# scrap download: zlib
    
 # ScrapSites
 class Vostfree:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['Vostfree']['baseUrl']
         self.context = {}
-        self.request = request
         self.soupStrainer = SoupStrainer(id='dle-content')
 
     def Main(self):
@@ -80,45 +81,45 @@ class Vostfree:
             ) for genre in soup.find(class_='right').find_all('a')]
             desc = soup.find(class_='slide-desc').text
 
-            episodes = [Elements(
-                option.text, f"{url}&nb={option['value'].split('_')[1]}"
-            ) for option in soup.find(class_='new_player_selector').find_all('option')]
+            episodes = [{'name':'Episodes', 'elements': [Elements(
+                option.text, quote(f"{url}&nb={option['value'].split('_')[1]}")
+            ) for option in soup.find(class_='new_player_selector').find_all('option')]}]
 
             try: date = soup.find(class_='slide-info').find('a').text
             except: date = ''
             time = soup.find(class_='slide-info').find_all('b')[-1].text.strip()
-            infos = [date, time, f'Episode {len(episodes)}']
+            infos = [date, time, f'Episode {len(episodes[0]["elements"])}']
 
-            self.context = Info( title, img, 'poster', genres, desc, episodes, [], infos )
+            self.context = Info( title, img, 'poster', genres, desc, episodes, infos )
         return self.context
 
     def Video(self, url):
-        newPlayers = {
-            'new_player_myvi': 'https://myvi.ru/player/embed/html/{}',
-            'new_player_gtv': 'https://iframedream.com/embed/{}.html',
-            'new_player_mp4': 'https://www.mp4upload.com/embed-{}.html',
-            'new_player_uqload': 'https://uqload.com/embed-{}.html',
-            'new_player_vidfast': 'http://vosmanga.tk/watch/{}',
-            'new_player_verystream': 'https://verystream.com/e/{}',
-            'new_player_rapids': 'https://rapidstream.co/embed-{}.html',
-            'new_player_cloudvideo': 'https://cloudvideo.tv/embed-{}.html',
-            'new_player_mytv': 'https://www.myvi.xyz/embed/{}',
-            'new_player_uptostream': 'https://uptostream.com/iframe/{}',
-            'new_player_fembed': 'https://www.fembed.com/v/{}.html',
-            'new_player_tune': 'https://tune.pk/player/embed_player.php?vid={}',
-            'new_player_sibnet': 'https://video.sibnet.ru/shell.php?videoid={}',
-            'new_player_netu': 'https://waaw.tv/watch_video.php?v={}',
-            'new_player_rutube': 'https://rutube.ru/play/embed/{}',
-            'new_player_ok': 'https://www.ok.ru/videoembed/{}',
-            'new_player_google': 'https://drive.google.com/open?id={}',
-            'new_player_mail': 'https://videoapi.my.mail.ru/videos/embed/mail/{}',
-            'new_player_mail2': 'https://my.mail.ru/video/embed/{}'
-        }
         container = []
+        url = unquote(url).split('&nb=')
+        if soup := Soup.Soup(url=self.baseUrl+url[0], soupStrainer=self.soupStrainer):
+            newPlayers = {
+                'new_player_myvi': 'https://myvi.ru/player/embed/html/{}',
+                'new_player_gtv': 'https://iframedream.com/embed/{}.html',
+                'new_player_mp4': 'https://www.mp4upload.com/embed-{}.html',
+                'new_player_uqload': 'https://uqload.com/embed-{}.html',
+                'new_player_vidfast': 'http://vosmanga.tk/watch/{}',
+                'new_player_verystream': 'https://verystream.com/e/{}',
+                'new_player_rapids': 'https://rapidstream.co/embed-{}.html',
+                'new_player_cloudvideo': 'https://cloudvideo.tv/embed-{}.html',
+                'new_player_mytv': 'https://www.myvi.xyz/embed/{}',
+                'new_player_uptostream': 'https://uptostream.com/iframe/{}',
+                'new_player_fembed': 'https://www.fembed.com/v/{}.html',
+                'new_player_tune': 'https://tune.pk/player/embed_player.php?vid={}',
+                'new_player_sibnet': 'https://video.sibnet.ru/shell.php?videoid={}',
+                'new_player_netu': 'https://waaw.tv/watch_video.php?v={}',
+                'new_player_rutube': 'https://rutube.ru/play/embed/{}',
+                'new_player_ok': 'https://www.ok.ru/videoembed/{}',
+                'new_player_google': 'https://drive.google.com/open?id={}',
+                'new_player_mail': 'https://videoapi.my.mail.ru/videos/embed/mail/{}',
+                'new_player_mail2': 'https://my.mail.ru/video/embed/{}'
+            }
 
-        if soup := Soup.Soup(url=self.baseUrl+url, soupStrainer=self.soupStrainer):
-            nb = self.request.GET.get('nb')
-            for player in soup.find(id=f'buttons_{nb}').find_all('div'):
+            for player in soup.find(id=f'buttons_{url[1]}').find_all('div'):
                 id = soup.find(id=f'content_{player["id"]}').text
 
                 try: link = newPlayers[player['class'][0]].format(id)
@@ -147,7 +148,7 @@ class Vostfree:
 
 
 class Vostanimes:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['Vostanimes']['baseUrl']
         self.context = {}
         self.soupStrainer = SoupStrainer('main')
@@ -155,13 +156,14 @@ class Vostanimes:
     def Main(self):
         if soup := Soup.Soup(url=self.baseUrl, soupStrainer=self.soupStrainer):
             for section in soup.find_all('section'):
-                sectionName = section.find(class_='Title').text.strip()
+                try: sectionName = section.find('h1').text.strip()
+                except: sectionName = section.find(class_='Title').text.strip()
                 if 'Saison' in sectionName.title(): continue
                 self.context[sectionName] = {'url': f'{self.baseUrl}/{section.find("a")["href"]}', 'container':[]}
                 
                 for anime in section.find_all('article'):
                     title = anime.find(class_='Title').text
-                    img = anime.find('img')['src']
+                    img = anime.find('img')['data-src']
                     imgClass = 'poster'
                     link = anime.find('a')['href'].replace(self.baseUrl, '')
                     type = 'Info'
@@ -173,7 +175,7 @@ class Vostanimes:
                     try: right = anime.find(class_='Year').text
                     except: right = ''
 
-                    if 'épisodes' in sectionName:
+                    if 'pisodes' in sectionName:
                         imgClass = 'vertical'
                         info = center.split(' ep')
                         left = (f'ep{info[1]}').title()
@@ -204,7 +206,7 @@ class Vostanimes:
     def Info(self, url):
         if soup := Soup.Soup(url=self.baseUrl+url, soupStrainer=self.soupStrainer):
             title = soup.find('h1').text.split(' stream')[0].split(' en')[0]
-            img = soup.find(class_='Image').find('img')['src']
+            img = soup.find(class_='Image').find('img')['data-src']
             genres = [Blank( genre.text.title(), genre['href'].replace(self.baseUrl, '') )
                 for genre in soup.find_all(rel='category')]
             desc = soup.find(class_='Description').text
@@ -217,11 +219,11 @@ class Vostanimes:
                     for tr in tbody.find_all('tr'):
                         try: seasons[x]['elements'].append(Elements(
                                 tr.find(class_='MvTbTtl').find('a').text, tr.find('a')['href'].replace(self.baseUrl, ''),
-                                tr.find('img')['src'], 'vertical'
+                                tr.find('img')['data-src'], 'vertical'
                             ))
                         except: break
                     episodes += seasons[x]['elements']
-            else: episodes = [Elements(title, url, img, 'poster')]
+            else: seasons = [{'name':'Film','elements' :[Elements(title, url, img, 'poster')]}]; episodes.append(1)
 
             try: date = soup.find(class_='Date').text
             except: date = ''
@@ -230,7 +232,7 @@ class Vostanimes:
                 url.split('/')[1].replace('-', ' ').title(), f'Episode {len(episodes)}'
             ]
 
-            self.context = Info(title, img, 'poster', genres, desc, episodes, seasons, infos)
+            self.context = Info(title, img, 'poster', genres, desc, seasons, infos)
         return self.context
 
     def Video(self, url):
@@ -252,7 +254,7 @@ class Vostanimes:
             
             for anime in soup.find_all('article'):
                 title = anime.find(class_='Title').text
-                img = anime.find('img')['src']
+                img = anime.find('img')['data-src']
                 link = anime.find('a')['href'].replace(self.baseUrl, '')
                 
                 try: time = anime.find(class_='Time').text
@@ -265,10 +267,9 @@ class Vostanimes:
 
 
 class Adkami:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['Adkami']['baseUrl']
         self.context = {}
-        self.request = request
         self.soupStrainer = SoupStrainer(class_='col-12')
 
     def Main(self):
@@ -312,7 +313,7 @@ class Adkami:
         if soup := Soup.Soup(url=self.baseUrl+url, soupStrainer=SoupStrainer('section')):
             title = soup.find_all(itemprop='name')[1].text
             img = soup.find('img')['src']
-            genres = [Blank( genre.text.title(), genre['href'].replace(self.baseUrl, '').replace('?', '&') )
+            genres = [Blank( genre.text.title(), quote(genre['href'].replace(self.baseUrl, '')) )
                 for genre in soup.find(class_='info').find_all(class_='label')]
             desc = ' '.join(soup.find(class_='description').text.strip().split('\n')[0].split(' ')[:-1])
 
@@ -332,7 +333,7 @@ class Adkami:
 
             infos = [span['title'].capitalize() for span in soup.find(class_='anime-information-icon').find_all('span')]
 
-            self.context = Info(title, img, 'extra-vertical', genres, desc, [], seasons, infos)
+            self.context = Info(title, img, 'extra-vertical', genres, desc, seasons, infos)
         return self.context
 
     def Video(self, url):
@@ -343,7 +344,7 @@ class Adkami:
         return container
 
     def Genre(self, genreUrl):
-        url = f'{self.baseUrl}{genreUrl}?genres[]={self.request.GET.get("genres[]")}'
+        url = self.baseUrl + unquote(genreUrl)
         if soup := Soup.Soup(url=url, soupStrainer=SoupStrainer(class_='video-item-list')):
             self.context[''] = {'url':url, 'container':[]}
             
@@ -363,7 +364,7 @@ class Adkami:
 
 # stand by clouflare and reCaptcha
 class Voiranime:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['Voiranime']['baseUrl']
         self.context = {}
         self.proxies = Proxies(self.baseUrl).proxies()
@@ -452,7 +453,7 @@ class Voiranime:
 
 
 class IAnimes:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['IAnimes']['baseUrl']
         self.context = {}
         self.soupStrainer = SoupStrainer(class_='content-inner')
@@ -499,18 +500,12 @@ class IAnimes:
         originUrl = f'{self.baseUrl}/{unquote(url)}'
 
         if soup := Soup.Soup(url=originUrl, soupStrainer=soupStrainer):
-            if '?' not in originUrl:
-                soup = Soup.Soup(url=f"{self.baseUrl}/{soup.find(class_='post_list').find('a')['href']}", soupStrainer=soupStrainer)
-                film = True 
-            else: film = False
-
             title = soup.find('h1').text
             img = soup.find_all('img')[2]['src']
             desc = soup.find_all('fieldset')[-1].find('font').text
 
             seasons = []
-            episodes = []
-            if not film:
+            if 'film' not in originUrl:
                 genres = [Blank( genre.text.title(), quote(genre['href']) )
                     for genre in soup.find_all(class_='genre')]
 
@@ -528,7 +523,7 @@ class IAnimes:
                         except: pass
                         if ep.text != season.text:
                             seasons[x]['elements'].append(Elements(ep.text, ep['href'].replace(self.baseUrl, '')))
-            else: episodes = [Elements(title, f'/{url}', img, 'poster')]
+            else: seasons = [{'name': 'Film','elements':[Elements(title, f'/{soup.find("a")["href"]}', img, 'poster')]}]
 
             infos = []
             for x, info in enumerate(soup.find_all('font', color='#4682B4')):
@@ -538,7 +533,7 @@ class IAnimes:
                 try: 'Genre' in infoTitle and not genres
                 except: genres = [Blank(genre.strip()) for genre in info.text.split(',')]
 
-            self.context = Info(title, img, 'poster', genres, desc, episodes, seasons, infos)
+            self.context = Info(title, img, 'poster', genres, desc, seasons, infos)
         return self.context
 
     def Video(self, url):
@@ -570,10 +565,9 @@ class IAnimes:
 
 
 class Wiflix:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['Wiflix']['baseUrl']
         self.context = {}
-        self.request = request
         self.soupStrainer = SoupStrainer(id='dle-content')
 
     def Main(self):
@@ -637,22 +631,23 @@ class Wiflix:
                     versions.append({'name': bloc.find('span').text, 'elements': []})
                     for ep in bloc.find_all('li'):
                         versions[x]['elements'].append(Elements(
-                            ep.text, f'{url}&rel={ep["rel"]}'
+                            ep.text, quote(f'{url}&rel={ep["rel"]}')
                         ))
                     episodes = versions[x]['elements'] if len(versions[x]['elements']) > len(episodes) else episodes
                 infos.append(f'Episode {len(episodes)}')
-            else: episodes = [Elements(title, url, img, 'poster')]
+            else: versions = [{'name': 'Film', 'elements':[Elements(title, url, img, 'poster')]}]
 
-            self.context = Info(title, img, 'poster', genres, desc, episodes, versions, infos)
+            self.context = Info(title, img, 'poster', genres, desc, versions, infos)
         return self.context
 
     def Video(self, url):
         container = []
-        url = self.baseUrl+url
+        unquoteUrl = unquote(url).split('&rel=')
+        url = self.baseUrl+unquoteUrl[0]
         if 'film' not in url:
             if soup := Soup.Soup(url=url, soupStrainer=SoupStrainer(class_='hostsblock')):
                 container.extend(Blank('', player['href'].replace('/vd.php?u=', ''))
-                    for player in soup.find(class_=self.request.GET.get('rel')).find_all('a'))
+                    for player in soup.find(class_=unquoteUrl[1]).find_all('a'))
 
         elif soup := Soup.Soup(url=url, soupStrainer=self.soupStrainer):
             container.extend(Blank('', player['href'].replace('/vd.php?u=', ''))
@@ -679,10 +674,9 @@ class Wiflix:
 
 
 class FrenchStream:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['FrenchStream']['baseUrl']
         self.context = {}
-        self.request = request
         self.soupStrainer = SoupStrainer(id='dle-content')
         self.proxies = Proxies(self.baseUrl).proxies()
 
@@ -746,21 +740,22 @@ class FrenchStream:
                     versions.append({'name': soup.find(class_=f'{version}-tab').text.strip(), 'elements': []})
                     for ep in soup.find_all(class_='elink')[x].find_all('a'):
                         versions[x]['elements'].append(Elements(
-                            ep.text, f'{url}&rel={ep["data-rel"]}'
+                            ep.text, quote(f'{url}&rel={ep["data-rel"]}')
                         ))
                     episodes = versions[x]['elements'] if len(versions[x]['elements']) > len(episodes) else episodes
                 infos.append(f'Episode {len(episodes)}')
-            else: episodes = [Elements(title, url, img, 'poster')]
+            else: versions = [{'name': 'Film', 'elements':[Elements(title, url, img, 'poster')]}]
 
-            self.context = Info(title, img, 'poster', genres, desc, episodes, versions, infos)
+            self.context = Info(title, img, 'poster', genres, desc, versions, infos)
         return self.context
 
     def Video(self, url):
         container = []
-        url = self.baseUrl+url
+        unquoteUrl = unquote(url).split('&rel=')
+        url = self.baseUrl+unquoteUrl[0]
         if 'serie' in url:
             if soup := Soup.Soup(url=url, soupStrainer=SoupStrainer(class_='series-center'), proxies=self.proxies):
-                for player in soup.find(id=self.request.GET.get('rel')).find_all(class_='fsctab'):
+                for player in soup.find(id=unquoteUrl[1]).find_all(class_='fsctab'):
                     try:
                         url = session.get(url=player['href'], headers=headers).url
                         container.append(Blank(player.text, url))
@@ -796,7 +791,7 @@ class FrenchStream:
 
 
 class Ninemanga:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['Ninemanga']['baseUrl']
         self.headers = headers | {
             'upgrade-insecure-requests': '1', 'sec-fetch-site': 'none', 'sec-fetch-mode': 'navigate', 'sec-fetch-user': '?1',
@@ -859,17 +854,17 @@ class Ninemanga:
             try: desc = soup.find(itemprop='description').text
             except: desc = ''
 
-            chapters = [Elements(
+            chapters = [{'name': soup.find(class_='chapterbox').find('h1').text, 'elements': [Elements(
                 chapter.text, chapter['href'].replace(self.baseUrl, '').replace('.html', '-10-1.html'), '', '', 'Image'
-            ) for chapter in soup.find_all(class_='chapter_list_a')][::-1]
+            ) for chapter in soup.find_all(class_='chapter_list_a')][::-1]}]
 
             try: status = soup.find(class_='red').text
             except: status = ''
             try: author = soup.find(itemprop='author').text.title()
             except: author = ''
-            infos = [status, author, f'Chapitre {len(chapters)}']
+            infos = [status, author, f'Chapitre {len(chapters[0]["elements"])}']
 
-            self.context = Info( title, img, 'poster', genres, desc, chapters, '', infos )
+            self.context = Info( title, img, 'poster', genres, desc, chapters, infos )
         return self.context
 
     def Image(self, url):
@@ -911,9 +906,92 @@ class Ninemanga:
                 self.context[genreName]['container'].append(Container( title, img, 'poster', link, views, '', chapter ))
         return self.context
 
+class ScanMangas:
+    def __init__(self):
+        self.baseUrl = scrapSites['ScanMangas']['baseUrl']
+        self.soupStrainer = SoupStrainer(class_='white')
+        self.context = {}
 
+    def Main(self):
+        for order in ['update', 'popular']:
+            url = f'{self.baseUrl}/tous-nos-mangas/?order={order}'
+            if soup := Soup.Soup(url=url, soupStrainer=self.soupStrainer):
+                sectionName = soup.find(class_='active').text
+                self.context[sectionName] = {'url':url, 'container':[]}
+                
+                for manga in soup.find_all(class_='bsx')[:31]:
+                    title = manga.find('a')['title']
+                    img = manga.find('img')['src']
+                    link = manga.find('a')['href'].replace(self.baseUrl, '')
+
+                    score = f"{'⭐'*int(float(manga.find('i').text)/2)} {manga.find('i').text}/10"
+                    
+                    self.context[sectionName]['container'].append(Container( title, img, 'poster', link, '', score ))
+        return self.context
+
+    def Search(self, search, page):
+        url = f'{self.baseUrl}/?s={search}&post_type=manga'
+        self.context = {'search': search, 'url': url, 'container': []}
+
+        if soup := Soup.Soup(url=url, soupStrainer=self.soupStrainer):
+            for manga in soup.find_all(class_='bsx'):
+                title = manga.find('a')['title']
+                img = manga.find('img')['src']
+                link = manga.find('a')['href'].replace(self.baseUrl, '')
+
+                try: score = f"{'⭐'*int(float(manga.find('i').text)/2)} {manga.find('i').text}/10"
+                except: score = '⭐'*5
+                
+                self.context['container'].append(Container( title, img, 'poster', link, '', score ))
+        return self.context
+
+    def Info(self, url):
+        url = self.baseUrl+url
+        if soup := Soup.Soup(url=url, soupStrainer=self.soupStrainer):
+            title = soup.find('h1').text
+            img = soup.find('img', class_='wp-post-image')['src']
+
+            genres = [Blank( genre.text, genre['href'].replace(self.baseUrl, '') ) for genre in soup.find_all(rel='tag')]
+            desc = soup.find(class_='desc').text
+
+            chapters = [{'name': soup.find(class_='widget-title_top').text, 'elements': [Elements(
+                chapter.find('a').text, chapter.find('a')['href'].replace(self.baseUrl, ''), '', '', 'Image'
+            ) for chapter in soup.find_all(class_='lchx desktop')][::-1]}]
+            
+            infos = [info.text for info in soup.find(class_='spe').find_all('span')[1:-1]]
+            self.context = Info( title, img, 'poster', genres, desc, chapters, infos )
+        return self.context
+
+    def Image(self, url):
+        container = []
+        if soup := Soup.Soup(url=self.baseUrl+url, soupStrainer=SoupStrainer('article')):
+            print(soup)
+            container.extend(
+                Blank(numPage+1, soup.find(class_='scan-page')['src'].replace('1.jpg', f'{numPage+1}.jpg'))
+            for numPage in range(len(soup.find(id='page-list').find_all('option'))))
+        return container
+
+    def Genre(self, genreUrl):
+        url = self.baseUrl + genreUrl
+        if soup := Soup.Soup(url=url, soupStrainer=SoupStrainer(class_='c-page')):
+            if soup := Soup.Soup(url=url, soupStrainer=self.soupStrainer):
+                genreName = soup.find(class_='widget-title_top').text
+                self.context[genreName] = {'url':url, 'container':[]}
+                
+                for manga in soup.find_all(class_='bsx')[:31]:
+                    title = manga.find('a')['title']
+                    img = manga.find('img')['src']
+                    link = manga.find('a')['href'].replace(self.baseUrl, '')
+
+                    score = f"{'⭐'*int(float(manga.find('i').text)/2)} {manga.find('i').text}/10"
+                    
+                    self.context[genreName]['container'].append(Container( title, img, 'poster', link, '', score ))
+        return self.context
+
+
+# stand by clouflare
 class MangasOrigines:
-    def __init__(self, request):
+    def __init__(self):
         self.baseUrl = scrapSites['MangasOrigines']['baseUrl']
         self.context = {}
 
@@ -1020,36 +1098,36 @@ def Index(request): return render(request, 'index.html', context={'scrapSites': 
 
 def ScrapMain(request):
     site = request.GET['Site']
-    context = {'site': site, 'sections': globals()[site](request).Main()}
+    context = {'site': site, 'sections': globals()[site]().Main()}
     return render(request, 'scrapMain.html', context=context)
 
 def ScrapSearch(request):
     site = request.GET['Site']
     search = request.GET['search']
     page = int(request.GET['page'])
-    context = {'site': site, 'search': search} | globals()[site](request).Search(search, page)
+    context = {'site': site, 'search': search} | globals()[site]().Search(search, page)
     return render(request, 'scrapSearch.html', context=context)
 
 def ScrapGenre(request):
     site = request.GET['Site']
     genreUrl = request.GET['url']
-    context = {'site': site, 'sections': globals()[site](request).Genre(genreUrl)}
+    context = {'site': site, 'sections': globals()[site]().Genre(genreUrl)}
     return render(request, 'scrapMain.html', context=context)
      
 def ScrapInfo(request):
     site = request.GET['Site']
     url = request.GET.get('url')
-    context = {'site': site, 'info': globals()[site](request).Info(url)}
+    context = {'site': site, 'info': globals()[site]().Info(url)}
     return render(request, 'scrapInfo.html', context=context)
 
 def ScrapVideo(request):
     site = request.GET['Site']
     url = request.GET.get('url')
-    context = {'site': site, 'container': globals()[site](request).Video(url)}
+    context = {'site': site, 'container': globals()[site]().Video(url)}
     return render(request, 'scrapVideo.html', context=context)
 
 def ScrapImage(request):
     site = request.GET['Site']
     url = request.GET.get('url')
-    context = {'site': site, 'container': globals()[site](request).Image(url)}
+    context = {'site': site, 'container': globals()[site]().Image(url)}
     return render(request, 'scrapImage.html', context=context)
