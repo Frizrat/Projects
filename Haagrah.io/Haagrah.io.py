@@ -1,16 +1,25 @@
-import pygame, math
+import pygame, math, io
 from pygame.locals import *
 from random import randint
+from urllib.request import urlopen
 
-def jouerSon(): # ajoute son au jeu
-    try: pygame.mixer.music.load('Haagrah.io.mp3'); pygame.mixer.music.play()
-    except: pass
+class Musique: # ajoute son au jeu
+    def __init__(self):
+        try: self.musique = pygame.mixer.music.load('Haagrah.io.mp3')
+        except: self.musique = pygame.mixer.music.load(io.BytesIO(urlopen('https://github.com/Frizrat/Projects/blob/main/Haagrah.io/Haagrah.io.mp3?raw=true').read()))
+    
+    def jouerSon(self):
+        try: pygame.mixer.music.play()
+        except: pass
 
 """initialise pygame"""
 pygame.init()
 pygame.display.set_caption('Haagrah.io')
-pygame.display.set_icon(pygame.image.load('Haagrah.io.png'))
-jouerSon()
+try: icon = pygame.image.load('Haagrah.io.png')
+except: icon = pygame.image.load(io.BytesIO(urlopen('https://raw.githubusercontent.com/Frizrat/Projects/main/Haagrah.io/Haagrah.io.png').read()))
+pygame.display.set_icon(icon)
+musique = Musique()
+musique.jouerSon()
 
 fenTaille = (1000, 750)
 fenetre = pygame.display.set_mode(fenTaille)
@@ -19,7 +28,9 @@ fenetre = pygame.display.set_mode(fenTaille)
 # permet de zoomer et dezoomer la map pour la rendre plus grande
 class Fond:
     def __init__(self):
-        self.originalImg = pygame.image.load('background.png')
+        try: img = pygame.image.load('background.png')
+        except: img = pygame.image.load(io.BytesIO(urlopen('https://raw.githubusercontent.com/Frizrat/Projects/main/Haagrah.io/background.png').read()))
+        self.originalImg = img
         self.zoom = 8
         self.modifierImg()
 
@@ -54,7 +65,9 @@ class Fond:
 
 class Joueur:
     def __init__(self):
-        self.img = pygame.image.load('JP_Zadi.png')
+        try: img = pygame.image.load('JP_Zadi.png')
+        except: img = pygame.image.load(io.BytesIO(urlopen('https://raw.githubusercontent.com/Frizrat/Projects/main/Haagrah.io/JP_Zadi.png').read()))
+        self.img = img
         self.taille = 100
         self.pos = [10, 10]
         self.changerTailleImg()
@@ -92,7 +105,7 @@ class Joueur:
 
                 self.taille += bouffe.taille
                 self.pos = [pos-bouffe.taille//2 for pos in self.pos]  # fait grandir le perso depuis son centre
-                if bouffe.taille >= 50: jouerSon() # joue un cri de la victoire quand on vainc une proie
+                if bouffe.taille >= 50: musique.jouerSon() # joue un cri de la victoire quand on vainc une proie
                 bouffes.remove(bouffe)
                 self.changerTailleImg()
 
@@ -151,7 +164,7 @@ class Ordinateur:
                 self.taille > bouffe.taille and self != bouffe ):
 
                 self.taille += bouffe.taille//2
-                if bouffe.taille >= 50: jouerSon() # joue un cri de la victoire quand on vainc une proie
+                if bouffe.taille >= 50: musique.jouerSon() # joue un cri de la victoire quand on vainc une proie
                 bouffes.remove(bouffe)
                 self.afficher()
 
@@ -165,7 +178,7 @@ class Ordinateur:
 
             self.taille += joueur.taille//2
             joueur.taille = 0
-            jouerSon()
+            musique.jouerSon()
             joueur.changerTailleImg()
 
         else: joueur.afficher()
@@ -184,7 +197,7 @@ ordinateurs = [Ordinateur() for _ in range(5)]
 while True:
     fond.afficher()
     for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONUP: jouerSon()
+        if event.type == pygame.MOUSEBUTTONUP: musique.jouerSon()
         elif event.type == pygame.QUIT: pygame.quit()       # quitte la page avec la croix
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE: pygame.quit()
 
