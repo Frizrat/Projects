@@ -9,7 +9,7 @@ def progressBar(progres, total):
 class NeuralNetwork:
     def __init__(self, inputSize, outputSize, hiddenLayers=0, hiddenSize=None, path='./weights/weight{}.npy'):
         self.neuralList = [inputSize]
-        hidden = hiddenSize if hiddenSize != None else int((inputSize * outputSize)**0.5)
+        hidden = hiddenSize if hiddenSize != None else int(((inputSize+1) * (outputSize+1))**0.5)
         self.neuralList.extend(hidden for _ in range(hiddenLayers))
         self.neuralList.append(outputSize)
 
