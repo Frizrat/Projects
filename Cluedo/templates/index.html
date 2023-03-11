@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cluedo</title>
+    <link rel="icon" href="https://tinfoil.media/i/01008AD00BE3E000/0/0/4863305ed787c5cccc4387137e67ee7765747d81d85a5d8959fae7c1c2cb5412" type="image/jpg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia">
+    <style>
+        * { margin: 0; padding: 0; font-family: "Sofia", sans-serif; color: aliceblue; overflow: hidden; }
+        .info-arbre { position: absolute; }
+        select { position: absolute; right: 10px; background-color: #006430; border: none; padding: 5px; }
+        #background {
+            position: absolute;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+        }
+        .charac {
+            z-index: 0;
+            position: absolute;
+        }
+        .texts-box {
+            position: absolute;
+            z-index: 1;
+            top: calc(100% - 150px);
+            height: 150px;
+            background-color: #006430;
+            width: 100%;
+        }
+        .text {
+            z-index: 2;
+            padding: 0 15px;
+            font-size: 30px;
+            text-align: center;
+        }
+        .continue {
+            position: absolute;
+            font-size: 15px;
+            right: 25px;
+            bottom: 25px;
+            color: black;
+        }
+        .question-box {
+            font-size: 50px;
+            text-align: center;
+        }
+        .question { margin-bottom: -20px; }
+        .choix {
+            font-size: 30px;
+            padding: 5px;
+            color: black;
+        }
+    </style>
+    <script>
+        function buttonToIndex(button) {
+            return Array.from(document.querySelectorAll('button')).indexOf(button)+1
+        }
+        function afficherText(index) {
+            const textsBox = document.querySelectorAll('.text-box');
+            if (typeof(index) != "number") { index = buttonToIndex(index) }
+            if (index > 0) { textsBox[index-1].style.display = 'none'; }
+            textsBox[index].style.display = '';
+            assombrirImage(textsBox[index].querySelector('p').className.replace('text ', ''))
+        }
+        function afficherQuestion(button) { afficherText(buttonToIndex(button)) }
+        function assombrirImage(nom) {
+            queryNot = '';
+            if (nom != '') {
+                document.querySelector(`img.charac.${nom}`).style.filter = 'brightness(100%)';
+                queryNot = `:not(.${nom})`;
+            }
+            for (image of document.querySelectorAll(`img.charac${queryNot}`)) { image.style.filter = 'brightness(50%)'; }
+        }
+    </script>
+</head>
+<body>
+    <div class="info-arbre">
+        <span>Taille: {{ taille }}</span><br>
+        <span>Hauteur: {{ hauteur }}</span><br>
+        <span>Index: {{ index }}</span>
+    </div>
+    <select name="menu" onchange="window.location.href = '/'+this.value+'/'">
+        <option value="menu" style="display: none;">Menu</option>
+        <option value="">Lecture</option>
+        <option value="chercheIndex">Chercher par Index</option>
+        <option value="ajout">Ajouter</option>
+        <option value="parcoursLargeur">Parcours Largeur</option>
+        <option value="parcoursPrefixe">Parcours Prefixe</option>
+        <option value="parcoursInfixe">Parcours Infixe</option>
+        <option value="parcoursSuffixe">Parcours Suffixe</option>
+        <option value="graphviz">Voir avec Graphviz</option>
+    </select>
+    {% if index %}
+        <img src="{{ background }}" id="background">
+        {% for charac in characters %}
+            <img class="charac {{ charac.nom }}" src="{{ charac.image }}" style="{{ charac.css }}">
+        {% endfor %}
+        <div class="texts-box">
+            {% for text in texts %}
+                <div class="text-box" style="display: none;">
+                    <p class="text {{ text.nom }}">{{ text.text }}</p>
+                    <button class="continue" onclick="afficherText(this)">Cliquer ici pour continuer...</button>
+                </div>
+            {% endfor %}
+            <form method="POST" action="changeIndex/" class="text-box question-box" style="display: none;">
+                <p class="question">{{ question.question }}</p>
+                {% for choix in question.choix %}
+                    <button class="choix" type="submit" name="index" value="{{ choix.index }}">{{ choix.reponse }}</button>
+                {% endfor %}
+            </form>
+        </div>
+    {% else %}
+        <style>
+            * { margin: 0; padding: 0; font-family: "Sofia", sans-serif; color: aliceblue; overflow: hidden; background-color: black; }
+            p { background-color: #006430; border: none; padding: 2px; color: white; text-align: center; }
+        </style>
+        <p>Pas d'index</p>
+    {% endif %}
+</body>
+<script>
+    Array.from(document.querySelectorAll('.continue')).slice(-1)[0].setAttribute('onclick', 'afficherQuestion(this)');
+    afficherText(0)
+</script>
+</html>

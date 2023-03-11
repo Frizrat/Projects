@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cluedo</title>
+    <link rel="icon" href="https://tinfoil.media/i/01008AD00BE3E000/0/0/4863305ed787c5cccc4387137e67ee7765747d81d85a5d8959fae7c1c2cb5412" type="image/jpg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia">
+    <style>
+        * { margin: 0; padding: 0; font-family: "Sofia", sans-serif; color: aliceblue; overflow: hidden; background-color: black; }
+        select { position: absolute; right: 10px; background-color: #006430; border: none; padding: 5px; }
+        form { text-align: center; }
+        input, button { background-color: #006430; border: none; padding: 2px; }
+    </style>
+</head>
+<body>
+    <select name="menu" onchange="window.location.href = '/'+this.value+'/'">
+        <option value="menu" style="display: none;">Menu</option>
+        <option value="">Lecture</option>
+        <option value="chercheIndex">Chercher par Index</option>
+        <option value="ajout">Ajouter</option>
+        <option value="parcoursLargeur">Parcours Largeur</option>
+        <option value="parcoursPrefixe">Parcours Prefixe</option>
+        <option value="parcoursInfixe">Parcours Infixe</option>
+        <option value="parcoursSuffixe">Parcours Suffixe</option>
+        <option value="graphviz">Voir avec Graphviz</option>
+    </select>
+    <form action="/changeIndex/" method="post">
+        <input type="number" placeholder="Index" name="index" min="{{ min }}" max="{{ max }}">
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
