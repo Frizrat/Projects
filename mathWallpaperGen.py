@@ -1,8 +1,6 @@
 """
-Use python mathWaalpaperGen.py 'img_path', 'deciamls_path', 'save_path'
+Use python mathWaalpaperGen.py 'img_path', 'decimals_path', 'save_path'
 """
-
-
 import itertools, sys
 from PIL import Image, ImageDraw, ImageFont
 
